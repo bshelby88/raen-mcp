@@ -1,0 +1,25 @@
+{
+  "name": "raen-mcp",
+  "version": "1.0.0",
+  "description": "RAEN x402 MCP gateway — Model Context Protocol server exposing RAEN's paid x402 services (law lookup, ticker analysis, dispute letters, image generation, contract analysis) as MCP tools.",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": { "raen-mcp": "src/index.js" },
+  "scripts": {
+    "start": "node src/index.js",
+    "start:http": "node src/http.js",
+    "test:paid": "node test/paid-call.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.0",
+    "@x402/core": "^2.30.0",
+    "@x402/evm": "^2.30.0",
+    "@x402/fetch": "^2.30.0",
+    "express": "^4.21.2",
+    "viem": "^2.32.0",
+    "zod": "^3.24.0"
+  },
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/bshelby88/raen-mcp.git" }
+}

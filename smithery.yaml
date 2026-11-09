@@ -1,0 +1,41 @@
+{
+  "name": "raen-mcp",
+  "displayName": "RAEN x402 Gateway",
+  "description": "Model Context Protocol gateway exposing RAEN's paid x402 services as MCP tools: consumer-law lookup ($0.05), ticker analysis ($0.05), FCRA dispute letters ($0.75), AI image generation ($0.01), and contract risk analysis ($0.05). Each call settles USDC on Base via the x402 protocol.",
+  "publisher": {
+    "name": "Royal Agentic Enterprises (RAEN)",
+    "url": "https://github.com/bshelby88"
+  },
+  "license": "MIT",
+  "runtime": "node",
+  "build": {
+    "entrypoint": "src/index.js",
+    "args": [],
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "start": {
+    "command": "node",
+    "args": ["src/index.js"]
+  },
+  "connection": {
+    "type": "stdio"
+  },
+  "toolsGenerated": true,
+  "keywords": ["x402", "payments", "usdc", "base", "consumer-rights", "law", "dispute-letters", "image-generation", "contract-analysis", "paid-api"],
+  "environmentVariables": [
+    {
+      "name": "RAEN_PAYER_KEY",
+      "description": "Private key of an EVM wallet funded with USDC on Base (mainnet, eip155:8453). Each tool call signs and settles an x402 micropayment. REQUIRED.",
+      "required": true
+    }
+  ],
+  "pricing": {
+    "law_lookup": "$0.05",
+    "ticker_analysis": "$0.05",
+    "dispute_letter": "$0.75",
+    "image_generate": "$0.01",
+    "contract_analysis": "$0.05"
+  }
+}
