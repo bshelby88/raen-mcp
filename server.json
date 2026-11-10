@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.bshelby88/raen-mcp",
+  "description": "RAEN paid x402 MCP tools: law lookup, dispute letters, image gen, contract analysis. USDC on Base.",
+  "repository": {
+    "url": "https://github.com/bshelby88/raen-mcp",
+    "source": "github",
+    "id": "1451427779"
+  },
+  "version": "1.0.0",
+  "title": "RAEN x402 Gateway",
+  "websiteUrl": "https://raen-mcp-gateway.fly.dev",
+  "environmentVariables": [
+    {
+      "name": "RAEN_PAYER_KEY",
+      "description": "Private key of an EVM wallet funded with USDC on Base (eip155:8453). Each tool call signs an x402 micropayment.",
+      "isRequired": true,
+      "format": "string",
+      "isSecret": true
+    }
+  ]
+}
