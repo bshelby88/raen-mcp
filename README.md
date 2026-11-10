@@ -5,6 +5,8 @@
 Live gateway (streamable HTTP): `https://raen-mcp-gateway.fly.dev/mcp`
 Auth: `Authorization: Bearer <MCP_GATEWAY_KEY>` (gateway key required — tool calls spend real USDC).
 
+> **New to RAEN?** New wallets get their **first call free** (charge-and-rebate, net $0). Want a free gateway dev key? Clear the [**x402 Dev Quest**](https://raen-x402-quest.vercel.app) — decode a live 402, read the price, settle a real $0.01 payment on Base, redeem the claim code at [raen-bounties](https://github.com/bshelby88/raen-bounties).
+
 ## Tools
 
 | Tool | Service | Price (USDC, Base) | Input |
@@ -54,6 +56,7 @@ Tool handlers call `wrapFetchWithPayment(fetch, x402Client)` from `@x402/fetch` 
 ## Endpoints (live manifests)
 
 ## Repo family
+- Earn a free dev key: the [x402 Dev Quest](https://raen-x402-quest.vercel.app) — 3 live levels, verified on-chain.
 - Templates for agents: [raen-agent-kit](https://github.com/bshelby88/raen-agent-kit) — LangChain/LangGraph + CrewAI, plug into this gateway in minutes.
 - Integration recipes for every endpoint: the [x402-cookbook](https://github.com/bshelby88/x402-cookbook) — copy-paste curl/Python recipes for the 402-challenge flow, free-first-call charge-and-rebate, and gateway config.
 
