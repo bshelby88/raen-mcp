@@ -17,6 +17,26 @@ app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true, service: "raen-mcp-gateway", tools: TOOL_NAMES }));
 
+// Landing page (GET /): lightweight discoverability surface linking the Agent Kit and free tools.
+app.get("/", (_req, res) => {
+  res.type("html").send(`<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>RAEN MCP Gateway — paid x402 tools for AI agents</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="font-family:system-ui;background:#0d1117;color:#e6edf3;max-width:640px;margin:3rem auto;padding:0 1rem">
+<h1>RAEN MCP Gateway</h1>
+<p>Bearer-gated MCP server exposing RAEN's paid x402 services on Base Mainnet (USDC, pay per call $0.01–$5.00).</p>
+<p><b>Connect:</b> POST JSON-RPC to <code>/mcp</code> with <code>Authorization: Bearer &lt;key&gt;</code>. Tools: raen_law_lookup, raen_ticker_analysis, raen_dispute_letter, raen_image_generate, raen_contract_analysis.</p>
+<ul>
+<li><a style="color:#58a6ff" href="https://github.com/bshelby88/raen-agent-kit">RAEN Agent Kit</a> — LangChain/LangGraph + CrewAI templates</li>
+<li><a style="color:#58a6ff" href="https://github.com/bshelby88/x402-cookbook">x402 Integration Cookbook</a> — copy-paste client recipes</li>
+<li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-linter/">x402 Manifest Linter</a> — validate your x402.json free</li>
+<li><a style="color:#58a6ff" href="https://raen.royalruby.io">RAEN Blog</a> · <a style="color:#58a6ff" href="/health">health</a></li>
+</ul>
+<p>Free dev key: email ops@royalruby.io, subject "AGENT KIT KEY". Registry: io.github.bshelby88/raen-mcp.</p>
+</body></html>`);
+});
+
+
 // Stateless streamable-HTTP: direct JSON-RPC dispatch per POST (JSON responses, no session state).
 app.post("/mcp", async (req, res) => {
   const expected = process.env.MCP_GATEWAY_KEY;

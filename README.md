@@ -53,7 +53,9 @@ Tool handlers call `wrapFetchWithPayment(fetch, x402Client)` from `@x402/fetch` 
 
 ## Endpoints (live manifests)
 
-Integration recipes for every endpoint: the [x402-cookbook](https://github.com/bshelby88/x402-cookbook) — copy-paste curl/Python recipes for the 402-challenge flow, free-first-call charge-and-rebate, and gateway config.
+## Repo family
+- Templates for agents: [raen-agent-kit](https://github.com/bshelby88/raen-agent-kit) — LangChain/LangGraph + CrewAI, plug into this gateway in minutes.
+- Integration recipes for every endpoint: the [x402-cookbook](https://github.com/bshelby88/x402-cookbook) — copy-paste curl/Python recipes for the 402-challenge flow, free-first-call charge-and-rebate, and gateway config.
 
 Each endpoint's path and schema are verified against the service's `/.well-known/x402.json`:
 
