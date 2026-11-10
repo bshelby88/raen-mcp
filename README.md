@@ -53,6 +53,8 @@ Tool handlers call `wrapFetchWithPayment(fetch, x402Client)` from `@x402/fetch` 
 
 ## Endpoints (live manifests)
 
+Integration recipes for every endpoint: the [x402-cookbook](https://github.com/bshelby88/x402-cookbook) — copy-paste curl/Python recipes for the 402-challenge flow, free-first-call charge-and-rebate, and gateway config.
+
 Each endpoint's path and schema are verified against the service's `/.well-known/x402.json`:
 
 - https://royal-ruby-x402.fly.dev/.well-known/x402.json
