@@ -3,6 +3,7 @@ RAEN runs 12 x402-payable API services on Base, behind one MCP gateway. Every to
 
 ## Services
 - MCP Gateway (streamable HTTP): https://raen-mcp-gateway.fly.dev/mcp (Bearer gateway key; tool calls spend USDC)
+- A2A Agent Card (agent-to-agent discovery): https://raen-mcp-gateway.fly.dev/.well-known/agent.json
 - API docs / OpenAPI: https://raen-api-docs.vercel.app/ · machine spec: https://raen-mcp-gateway.fly.dev/openapi.json
 - x402 Dev Quest (free gateway key): https://raen-x402-quest.vercel.app
 - UDAP explorer: https://raen-udap-explorer.vercel.app/

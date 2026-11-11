@@ -31,7 +31,8 @@ app.get("/llms.txt", sendDoc("llms.txt", "text/plain; charset=utf-8"));
 app.get("/openapi.json", sendDoc("openapi.json", "application/json"));
 app.get("/.well-known/x402", sendDoc("openapi.json", "application/json"));
 app.get("/.well-known/agent-registration.json", sendDoc("agent-registration.json", "application/json"));
-app.get("/.well-known/agent.json", sendDoc("agent-registration.json", "application/json"));
+// A2A Protocol AgentCard (A2A discovery spec) — distinct from the ERC-8004 registration above.
+app.get("/.well-known/agent.json", sendDoc("agent-card.json", "application/json"));
 
 // Landing page (GET /): lightweight discoverability surface linking the Agent Kit and free tools.
 app.get("/", (_req, res) => {
@@ -48,6 +49,7 @@ app.get("/", (_req, res) => {
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-linter/">x402 Manifest Linter</a> — validate your x402.json free</li>
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-scorecard/">x402 Launch Readiness Scorecard</a> — is your paid API agent-ready? 60-second score</li>
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/raen-payback-calculator/">x402 Payback Calculator</a> — pay-per-call vs flat SaaS, side by side</li>
+<li><a style="color:#58a6ff" href="/.well-known/agent.json">A2A Agent Card</a> · <a style="color:#58a6ff" href="/.well-known/agent-registration.json">ERC-8004 registration</a></li>
 <li><a style="color:#58a6ff" href="https://raen.royalruby.io">RAEN Blog</a> · <a style="color:#58a6ff" href="/health">health</a></li>
 </ul>
 <p>Free 30-day dev key, self-serve: POST <code>/keys/request</code> with <code>{"email":"you@example.com"}</code> and click the link we email you. Registry: io.github.bshelby88/raen-mcp. Sales ledger: <a style="color:#58a6ff" href="https://settlement-collector.fly.dev/ledger">settlement-collector.fly.dev/ledger</a>.</p>
