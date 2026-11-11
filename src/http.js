@@ -4,6 +4,7 @@
 //       because every tool call SPENDS the payer wallet's USDC).
 import express from "express";
 import { TOOLS } from "./tools.js";
+import { registerKeyRoutes, isValidGatewayKey } from "./keys.js";
 
 const TOOL_NAMES = TOOLS.map((t) => t.name);
 const PROTOCOL_VERSION = "2025-03-26";
@@ -16,6 +17,8 @@ const app = express();
 app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true, service: "raen-mcp-gateway", tools: TOOL_NAMES }));
+
+registerKeyRoutes(app);
 
 // Discovery surfaces (static, no auth): x402scan reads /openapi.json, agents read /llms.txt,
 // ERC-8004 verifiers read /.well-known/agent-registration.json.
@@ -47,7 +50,7 @@ app.get("/", (_req, res) => {
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/raen-payback-calculator/">x402 Payback Calculator</a> — pay-per-call vs flat SaaS, side by side</li>
 <li><a style="color:#58a6ff" href="https://raen.royalruby.io">RAEN Blog</a> · <a style="color:#58a6ff" href="/health">health</a></li>
 </ul>
-<p>Free dev key: email ops@royalruby.io, subject "AGENT KIT KEY". Registry: io.github.bshelby88/raen-mcp.</p>
+<p>Free 30-day dev key, self-serve: POST <code>/keys/request</code> with <code>{"email":"you@example.com"}</code> and click the link we email you. Registry: io.github.bshelby88/raen-mcp. Sales ledger: <a style="color:#58a6ff" href="https://settlement-collector.fly.dev/ledger">settlement-collector.fly.dev/ledger</a>.</p>
 </body></html>`);
 });
 
@@ -81,7 +84,7 @@ app.post("/mcp", async (req, res) => {
   const expected = process.env.MCP_GATEWAY_KEY;
   if (expected) {
     const auth = req.headers.authorization || "";
-    if (auth !== `Bearer ${expected}`) {
+    if (!auth.startsWith("Bearer ") || !isValidGatewayKey(auth.slice(7))) {
       return res.status(401).json({ error: "Unauthorized. Send Authorization: Bearer <MCP_GATEWAY_KEY>." });
     }
   }
