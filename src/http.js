@@ -96,7 +96,7 @@ app.get("/mcp", (req, res) => {
       network: "eip155:8453",
       amount: "50000",
       asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-      payTo: "0x7861db4efc14a1ed5dd8c96c528a3796560f1393",
+      payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72f",
       maxTimeoutSeconds: 300,
       extra: { name: "USD Coin", version: "2" },
     }],
