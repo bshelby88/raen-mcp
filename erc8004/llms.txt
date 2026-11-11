@@ -1,0 +1,19 @@
+# RAEN
+RAEN runs 12 x402-payable API services on Base, behind one MCP gateway. Every tool call settles in USDC on-chain via the x402 protocol; new wallets get their first call free (charge-and-rebate, net $0).
+
+## Services
+- MCP Gateway (streamable HTTP): https://raen-mcp-gateway.fly.dev/mcp (Bearer gateway key; tool calls spend USDC)
+- API docs / OpenAPI: https://raen-api-docs.vercel.app/
+- x402 Dev Quest (free gateway key): https://raen-x402-quest.vercel.app
+- UDAP explorer: https://raen-udap-explorer.vercel.app/
+- Agent kit (LangChain/LangGraph + CrewAI): https://github.com/bshelby88/raen-agent-kit
+- Recipes: https://github.com/bshelby88/x402-cookbook
+
+## Tools (via MCP gateway)
+- raen_law_lookup — legal doctrine lookup with citations
+- raen_contract_review — contract review
+- raen_dispute_package — dispute package generation
+- plus 2 more service endpoints; `tools/list` returns all 5.
+
+## Payments
+x402 / USDC on Base. Payer wallet: 0xfbc0eb7811d477e55261d956df39f0046e192240
