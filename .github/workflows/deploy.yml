@@ -18,13 +18,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - run: docker pull ghcr.io/bshelby88/raen-mcp-gateway:latest
+      - run: docker pull ghcr.io/bshelby88/raen-mcp:latest
       - run: flyctl auth docker
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - name: Push image to Fly registry
         run: |
-          docker tag ghcr.io/bshelby88/raen-mcp-gateway:latest registry.fly.io/raen-mcp-gateway:deploy-${GITHUB_SHA::7}
+          docker tag ghcr.io/bshelby88/raen-mcp:latest registry.fly.io/raen-mcp-gateway:deploy-${GITHUB_SHA::7}
           docker push registry.fly.io/raen-mcp-gateway:deploy-${GITHUB_SHA::7}
       - name: Deploy image
         run: flyctl deploy --image registry.fly.io/raen-mcp-gateway:deploy-${GITHUB_SHA::7} --now -a raen-mcp-gateway
