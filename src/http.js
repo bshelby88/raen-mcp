@@ -17,6 +17,19 @@ app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true, service: "raen-mcp-gateway", tools: TOOL_NAMES }));
 
+// Discovery surfaces (static, no auth): x402scan reads /openapi.json, agents read /llms.txt,
+// ERC-8004 verifiers read /.well-known/agent-registration.json.
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+const DOCS_DIR = dirname(fileURLToPath(import.meta.url));
+const sendDoc = (file, type) => (_req, res) => { try { res.type(type).send(readFileSync(join(DOCS_DIR, file))); } catch { res.status(404).end(); } };
+app.get("/llms.txt", sendDoc("llms.txt", "text/plain; charset=utf-8"));
+app.get("/openapi.json", sendDoc("openapi.json", "application/json"));
+app.get("/.well-known/x402", sendDoc("openapi.json", "application/json"));
+app.get("/.well-known/agent-registration.json", sendDoc("agent-registration.json", "application/json"));
+app.get("/.well-known/agent.json", sendDoc("agent-registration.json", "application/json"));
+
 // Landing page (GET /): lightweight discoverability surface linking the Agent Kit and free tools.
 app.get("/", (_req, res) => {
   res.type("html").send(`<!DOCTYPE html>

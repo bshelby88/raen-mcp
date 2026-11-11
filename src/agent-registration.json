@@ -1,0 +1,47 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "RAEN MCP Gateway",
+  "description": "RAEN \u2014 12 x402-payable API services on Base, served over one MCP gateway. Legal research, contract review, dispute packages and more; every call settles in USDC via x402 (first call free via charge-and-rebate).",
+  "image": "https://raen-x402-quest.vercel.app/icon.png",
+  "endpoints": [
+    {
+      "type": "application/json",
+      "url": "https://raen-mcp-gateway.fly.dev/mcp",
+      "transport": "MCP streamable HTTP"
+    },
+    {
+      "type": "text/plain",
+      "url": "https://raw.githubusercontent.com/bshelby88/raen-mcp/main/erc8004/llms.txt",
+      "transport": "llms.txt"
+    },
+    {
+      "type": "text/html",
+      "url": "https://raen-api-docs.vercel.app/",
+      "transport": "docs"
+    }
+  ],
+  "registrations": [
+    {
+      "agentId": 1178050,
+      "agentRegistry": "eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+    }
+  ],
+  "services": [
+    {
+      "name": "raen_law_lookup",
+      "description": "Look up legal doctrine with citations via the RAEN gateway (x402 USDC on Base)."
+    },
+    {
+      "name": "raen_contract_review",
+      "description": "Contract review service (x402)."
+    },
+    {
+      "name": "raen_dispute_package",
+      "description": "Dispute package generation (x402)."
+    }
+  ],
+  "agentWallet": {
+    "eip155:8453": "0xfbc0eb7811d477e55261d956df39f0046e192240"
+  },
+  "x402Support": true
+}

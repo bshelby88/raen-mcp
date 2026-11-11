@@ -1,0 +1,23 @@
+# RAEN
+RAEN runs 12 x402-payable API services on Base, behind one MCP gateway. Every tool call settles in USDC on-chain via the x402 protocol; new wallets get their first call free (charge-and-rebate, net $0).
+
+## Services
+- MCP Gateway (streamable HTTP): https://raen-mcp-gateway.fly.dev/mcp (Bearer gateway key; tool calls spend USDC)
+- API docs / OpenAPI: https://raen-api-docs.vercel.app/ · machine spec: https://raen-mcp-gateway.fly.dev/openapi.json
+- x402 Dev Quest (free gateway key): https://raen-x402-quest.vercel.app
+- UDAP explorer: https://raen-udap-explorer.vercel.app/
+- Agent kit (LangChain/LangGraph + CrewAI): https://github.com/bshelby88/raen-agent-kit
+- Recipes: https://github.com/bshelby88/x402-cookbook
+- Blog: https://raen.royalruby.io
+
+## Tools (via MCP gateway, POST /mcp)
+- raen_law_lookup — legal doctrine lookup with citations
+- raen_ticker_analysis — market/ticker analysis
+- raen_dispute_letter — dispute letter generation
+- raen_image_generate — image generation
+- raen_contract_analysis — contract analysis
+`tools/list` returns full schemas and per-tool prices.
+
+## Payments
+x402 / USDC on Base. First call free per wallet. Payer wallet: 0xfbc0eb7811d477e55261d956df39f0046e192240
+ERC-8004 agent identity: eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432 agentId 1178050 (https://raen-mcp-gateway.fly.dev/.well-known/agent-registration.json)

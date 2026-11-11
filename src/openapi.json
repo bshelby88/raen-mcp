@@ -1,0 +1,23 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RAEN MCP Gateway",
+    "version": "1.0.0",
+    "description": "RAEN paid x402 services on Base (USDC). Connect over MCP streamable HTTP at /mcp with a Bearer gateway key; each tool call settles in USDC via x402. New wallets get their first call free (charge-and-rebate, net $0). Free dev key: clear https://raen-x402-quest.vercel.app.",
+    "contact": { "name": "RAEN (Bean)", "email": "ops@royalruby.io", "url": "https://raen-api-docs.vercel.app/" },
+    "x-guidance": "Use the MCP transport at /mcp for all five tools. Prices per call are in each operation. First call per wallet is free."
+  },
+  "servers": [{ "url": "https://raen-mcp-gateway.fly.dev" }],
+  "paths": {
+    "/mcp": {
+      "post": {
+        "summary": "MCP streamable HTTP endpoint (JSON-RPC: initialize, tools/list, tools/call)",
+        "description": "Bearer-gated MCP server. tools/call with a paid tool returns an x402 402 payment challenge (USDC on Base); settle to execute. Tools: raen_law_lookup, raen_ticker_analysis, raen_dispute_letter, raen_image_generate, raen_contract_analysis.",
+        "x-payment-info": { "price": { "mode": "fixed", "currency": "USD", "amount": "0.01" }, "protocols": [{ "x402": {} }] },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": { "200": { "description": "JSON-RPC response" }, "402": { "description": "Payment required (x402 challenge)" } }
+      }
+    }
+  },
+  "x-mcp-tools": ["raen_law_lookup", "raen_ticker_analysis", "raen_dispute_letter", "raen_image_generate", "raen_contract_analysis"]
+}
