@@ -79,6 +79,33 @@ app.get("/openapi.json", (_req, res) => {
   });
 });
 
+// x402 wall on GET /mcp — serves the canonical x402 v2 402 challenge for discovery/registration.
+app.get("/mcp", (req, res) => {
+  const challenge = {
+    x402Version: 2,
+    error: "Payment required",
+    resource: {
+      url: "https://raen-mcp-gateway.fly.dev/mcp",
+      description: "RAEN MCP Gateway — bearer-gated MCP server with 5 paid x402 tools (legal research, ticker analysis, dispute letters, image generation, contract analysis). Pay per call in USDC on Base; first call free via charge-and-rebate.",
+      mimeType: "application/json",
+    },
+    accepts: [{
+      scheme: "exact",
+      network: "eip155:8453",
+      amount: "50000",
+      asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      payTo: "0x7861db4efc14a1ed5dd8c96c528a3796560f1393",
+      maxTimeoutSeconds: 300,
+      extra: { name: "USD Coin", version: "2" },
+    }],
+    extensions: {
+      bazaar: { info: { input: { type: "http", queryParams: {}, method: "POST" }, output: { type: "json", example: { ok: true, result: "RAEN MCP Gateway tool result" } } } },
+    },
+  };
+  res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
+  res.status(402).json(challenge);
+});
+
 // Stateless streamable-HTTP: direct JSON-RPC dispatch per POST (JSON responses, no session state).
 app.post("/mcp", async (req, res) => {
   const expected = process.env.MCP_GATEWAY_KEY;
