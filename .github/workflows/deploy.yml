@@ -1,5 +1,6 @@
 name: Deploy gateway to Fly
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths: ["src/**", "fly.toml", "Dockerfile"]
