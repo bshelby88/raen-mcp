@@ -52,6 +52,30 @@ app.get("/", (_req, res) => {
 });
 
 
+// OpenAPI discovery document (GET /openapi.json) — required for x402scan SIWX registration.
+app.get("/openapi.json", (_req, res) => {
+  const HOST = "https://raen-mcp-gateway.fly.dev";
+  res.json({
+    openapi: "3.0.3",
+    info: { title: "RAEN MCP Gateway", version: "1.0.0", description: "Bearer-gated MCP server exposing RAEN's paid x402 services on Base Mainnet (USDC, pay per call)." },
+    servers: [{ url: HOST }],
+    paths: {
+      "/mcp": {
+        post: {
+          summary: "MCP JSON-RPC endpoint (Streamable HTTP)",
+          description: "Send JSON-RPC 2.0 requests: initialize, tools/list, tools/call. Authorization: Bearer required. x402 payment per tool call via Base Mainnet USDC.",
+          security: [{ bearerAuth: [] }],
+          requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { jsonrpc: { type: "string", example: "2.0" }, id: { type: "integer" }, method: { type: "string", enum: ["initialize", "ping", "tools/list", "tools/call"] }, params: { type: "object" } }, required: ["jsonrpc", "id", "method"] } } } },
+          responses: { "200": { description: "JSON-RPC response", content: { "application/json": { schema: { type: "object" } } } } }
+        }
+      },
+      "/health": { get: { summary: "Health check", responses: { "200": { description: "OK" } } } }
+    },
+    "x-mcp-tools": TOOL_NAMES.map((name) => ({ name })),
+    components: { securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } } }
+  });
+});
+
 // Stateless streamable-HTTP: direct JSON-RPC dispatch per POST (JSON responses, no session state).
 app.post("/mcp", async (req, res) => {
   const expected = process.env.MCP_GATEWAY_KEY;
