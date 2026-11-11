@@ -30,6 +30,8 @@ app.get("/", (_req, res) => {
 <li><a style="color:#58a6ff" href="https://github.com/bshelby88/raen-agent-kit">RAEN Agent Kit</a> — LangChain/LangGraph + CrewAI templates</li>
 <li><a style="color:#58a6ff" href="https://github.com/bshelby88/x402-cookbook">x402 Integration Cookbook</a> — copy-paste client recipes</li>
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-linter/">x402 Manifest Linter</a> — validate your x402.json free</li>
+<li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-scorecard/">x402 Launch Readiness Scorecard</a> — is your paid API agent-ready? 60-second score</li>
+<li><a style="color:#58a6ff" href="https://bshelby88.github.io/raen-payback-calculator/">x402 Payback Calculator</a> — pay-per-call vs flat SaaS, side by side</li>
 <li><a style="color:#58a6ff" href="https://raen.royalruby.io">RAEN Blog</a> · <a style="color:#58a6ff" href="/health">health</a></li>
 </ul>
 <p>Free dev key: email ops@royalruby.io, subject "AGENT KIT KEY". Registry: io.github.bshelby88/raen-mcp.</p>
