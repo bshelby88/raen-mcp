@@ -103,6 +103,14 @@ export function registerKeyRoutes(app) {
       await sendVerificationEmail(email, signToken(email, Date.now()));
     } catch (e) {
       console.error("keys/request email failed:", e.message);
+      // Resend 422 validation_error = the address itself can't receive mail
+      // (e.g. example.com, RFC-2606 test domains). That's a caller mistake,
+      // not a transport outage — say so with a 400 instead of a dead-end 503.
+      if (/resend 422/.test(e.message) && /validation_error/i.test(e.message)) {
+        return res.status(400).json({
+          error: "that email address can't receive mail (the email provider rejected it) — double-check the address and try again",
+        });
+      }
       return res.status(503).json({ error: "could not send verification email; try again later" });
     }
     res.status(202).json({ ok: true, message: "check your email — a verification link is on its way" });
