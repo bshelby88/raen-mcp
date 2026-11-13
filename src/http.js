@@ -49,6 +49,13 @@ app.get("/", (_req, res) => {
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-linter/">x402 Manifest Linter</a> — validate your x402.json free</li>
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-scorecard/">x402 Launch Readiness Scorecard</a> — is your paid API agent-ready? 60-second score</li>
 <li><a style="color:#58a6ff" href="https://bshelby88.github.io/raen-payback-calculator/">x402 Payback Calculator</a> — pay-per-call vs flat SaaS, side by side</li>
+<li><a style="color:#58a6ff" href="https://x402-playground.fly.dev/">x402 Live Playground</a> — watch a real 402 challenge decoded live, no wallet needed</li>
+<li><a style="color:#58a6ff" href="https://x402-decoder.vercel.app">x402 Challenge Decoder</a> — paste a payment-required header, get decoded accepts[] JSON</li>
+<li><a style="color:#58a6ff" href="https://bshelby88.github.io/x402-paywall-generator/">x402 Paywall Code Generator</a> — copy-paste 402 middleware (Express / Hono / FastAPI) on Base USDC</li>
+<li><a style="color:#58a6ff" href="https://bshelby88.github.io/raen-postman/">Run in Postman</a> — one-click collection for all 12 services; unpaid requests fetch a live 402 free</li>
+<li><a style="color:#58a6ff" href="https://bshelby88.github.io/raen-live-badges/">Live Badges</a> — embeddable per-service price badges ($0.01–$5.00)</li>
+<li><a style="color:#58a6ff" href="https://raen-udap-explorer.vercel.app">State UDAP Explorer</a> — plain-English guide to the 10 most-cited state UDAP statutes</li>
+<li><a style="color:#58a6ff" href="https://raen-referral.vercel.app">Referral Bounty</a> — $1 USDC for a working integration referral</li>
 <li><a style="color:#58a6ff" href="/.well-known/agent.json">A2A Agent Card</a> · <a style="color:#58a6ff" href="/.well-known/agent-registration.json">ERC-8004 registration</a></li>
 <li><a style="color:#58a6ff" href="https://raen.royalruby.io">RAEN Blog</a> · <a style="color:#58a6ff" href="/health">health</a></li>
 </ul>
