@@ -7,9 +7,15 @@
     "source": "github",
     "id": "1451427779"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "RAEN x402 Gateway",
   "websiteUrl": "https://raen-mcp-gateway.fly.dev",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://raen-mcp-gateway.fly.dev/mcp"
+    }
+  ],
   "environmentVariables": [
     {
       "name": "RAEN_PAYER_KEY",
