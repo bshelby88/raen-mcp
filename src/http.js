@@ -12,7 +12,7 @@ const PROTOCOL_VERSION = "2025-03-26";
 const TOOL_PRICES_USD = {
   raen_law_lookup: 0.05,
   raen_ticker_analysis: 0.05,
-  raen_dispute_letter: 0.75,
+  raen_dispute_letter: 0.10,
   raen_image_generate: 0.01,
   raen_contract_analysis: 0.05,
 };
