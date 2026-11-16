@@ -44,7 +44,19 @@ function x402Challenge(toolName) {
 }
 
 function toolDefs() {
-  return TOOLS.map((t) => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
+  return TOOLS.map((t) => ({
+    name: t.name,
+    description: t.description,
+    inputSchema: t.inputSchema,
+    // MCP tool annotations (ARC-63: mcptry listing score + client spend hints).
+    annotations: {
+      title: t.title || t.name,
+      readOnlyHint: true, // paid API calls produce content; they modify no external system
+      destructiveHint: false,
+      idempotentHint: false, // each call is a separately settled x402 micropayment
+      openWorldHint: true, // calls hit live RAEN x402 fleet endpoints
+    },
+  }));
 }
 
 const app = express();
