@@ -13,7 +13,7 @@ Auth: `Authorization: Bearer <MCP_GATEWAY_KEY>` (gateway key required — tool c
 |---|---|---|---|
 | `raen_law_lookup` | royal-ruby | $0.05 | `{topic}` — FCRA/FDCPA/TILA/state-UDAP citations |
 | `raen_ticker_analysis` | tradingagents | $0.05 | `{ticker, date?}` — synthetic market-consensus demo (not financial advice) |
-| `raen_dispute_letter` | dispute-forge | $0.75 | `{creditor, reason}` — FCRA dispute letter + SVG certificate |
+| `raen_dispute_letter` | dispute-forge | $0.10 | `{creditor, reason}` — FCRA dispute letter + SVG certificate |
 | `raen_image_generate` | nanobanana | $0.01 | `{prompt, aspectRatio?}` — AI image, base64 PNG |
 | `raen_contract_analysis` | contract-eye | $0.05 | `{text, focus?}` — contract risk score + flagged clauses |
 

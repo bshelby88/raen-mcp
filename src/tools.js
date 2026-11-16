@@ -62,7 +62,7 @@ export const TOOLS = [
   {
     name: "raen_dispute_letter",
     description:
-      "Generate an FCRA-compliant credit dispute letter plus an SVG certificate of dispute (Dispute-Forge). $0.75 USDC (x402, Base).",
+      "Generate an FCRA-compliant credit dispute letter plus an SVG certificate of dispute (Dispute-Forge). $0.10 USDC (x402, Base).",
     inputSchema: {
       type: "object",
       properties: {
@@ -76,7 +76,7 @@ export const TOOLS = [
         creditor: args.creditor,
         reason: args.reason,
       });
-      return wrap("dispute-forge dispute-pack", "0.75", r);
+      return wrap("dispute-forge dispute-pack", "0.10", r);
     },
   },
   {
