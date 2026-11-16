@@ -29,7 +29,9 @@
     {
       "src": "https://bshelby88.github.io/raen-mcp/docs/icon.svg",
       "mimeType": "image/svg+xml",
-      "sizes": "any"
+      "sizes": [
+        "any"
+      ]
     }
   ]
 }
