@@ -26,6 +26,7 @@ function wrap(name, price, result) {
 export const TOOLS = [
   {
     name: "raen_law_lookup",
+    title: "RAEN Law Lookup (FCRA/FDCPA/TILA/UDAP)",
     description:
       "Look up US consumer-protection law citations (FCRA, FDCPA, TILA, state UDAP) on a topic. Returns formal citations, plain-English summaries, reporting timelines, and statutes of limitations. Information only, not legal advice. $0.05 USDC (x402, Base).",
     inputSchema: {
@@ -42,6 +43,7 @@ export const TOOLS = [
   },
   {
     name: "raen_ticker_analysis",
+    title: "RAEN Ticker Consensus Demo",
     description:
       "Request a synthetic ticker market-consensus demo (TradingAgents payload). No live market data; not financial advice. $0.05 USDC (x402, Base).",
     inputSchema: {
@@ -61,6 +63,7 @@ export const TOOLS = [
   },
   {
     name: "raen_dispute_letter",
+    title: "RAEN Dispute Letter",
     description:
       "Generate an FCRA-compliant credit dispute letter plus an SVG certificate of dispute (Dispute-Forge). $0.10 USDC (x402, Base).",
     inputSchema: {
@@ -81,6 +84,7 @@ export const TOOLS = [
   },
   {
     name: "raen_image_generate",
+    title: "RAEN Image Generation",
     description:
       "Generate an AI image from a text prompt (Gemini upstream). Returns base64 PNG metadata/JSON. $0.01 USDC (x402, Base).",
     inputSchema: {
@@ -104,6 +108,7 @@ export const TOOLS = [
   },
   {
     name: "raen_contract_analysis",
+    title: "RAEN Contract Analysis",
     description:
       "Analyze contract text for risky, one-sided, or unusual clauses. Returns a risk score, flagged clauses with severity/explanation/suggested edits (Contract-Eye). $0.05 USDC (x402, Base).",
     inputSchema: {

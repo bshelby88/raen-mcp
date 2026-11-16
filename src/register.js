@@ -27,7 +27,18 @@ export async function registerTools(server) {
   for (const t of TOOLS) {
       server.registerTool(
         t.name,
-        { description: t.description, inputSchema: ZOD[t.name] },
+        {
+          description: t.description,
+          inputSchema: ZOD[t.name],
+          // Tool annotations (MCP spec hints for clients; ARC-63 mcptry +4/+2 listing score).
+          annotations: {
+            title: t.title || t.name,
+            readOnlyHint: true, // paid API calls produce content; they modify no external system
+            destructiveHint: false,
+            idempotentHint: false, // each call is a separately settled x402 micropayment
+            openWorldHint: true, // calls hit live RAEN x402 fleet endpoints
+          },
+        },
         async (args) => {
           try {
             return await t.handler(args ?? {});

@@ -7,7 +7,7 @@
     "source": "github",
     "id": "1451427779"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "title": "RAEN x402 Gateway",
   "websiteUrl": "https://raen-mcp-gateway.fly.dev",
   "remotes": [
@@ -23,6 +23,13 @@
       "isRequired": true,
       "format": "string",
       "isSecret": true
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://bshelby88.github.io/raen-mcp/docs/icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": "any"
     }
   ]
 }
