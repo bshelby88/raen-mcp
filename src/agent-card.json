@@ -42,7 +42,7 @@
     {
       "id": "raen_dispute_letter",
       "name": "Dispute Letter",
-      "description": "Generate an FCRA-compliant credit dispute letter plus an SVG certificate of dispute (Dispute-Forge). Price: $0.75 USDC per call (x402, Base).",
+      "description": "Generate an FCRA-compliant credit dispute letter plus an SVG certificate of dispute (Dispute-Forge). Price: $0.10 USDC per call (x402, Base).",
       "tags": ["legal", "credit", "dispute", "documents"]
     },
     {
