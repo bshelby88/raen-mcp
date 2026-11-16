@@ -8,6 +8,40 @@ import { registerKeyRoutes, isValidGatewayKey } from "./keys.js";
 
 const TOOL_NAMES = TOOLS.map((t) => t.name);
 const PROTOCOL_VERSION = "2025-03-26";
+// Per-tool price in USD (mirrors src/tools.js wrap() prices). 1 USDC = 1e6 units.
+const TOOL_PRICES_USD = {
+  raen_law_lookup: 0.05,
+  raen_ticker_analysis: 0.05,
+  raen_dispute_letter: 0.75,
+  raen_image_generate: 0.01,
+  raen_contract_analysis: 0.05,
+};
+
+// Canonical x402 v2 challenge (mirrors GET /mcp wall). Amount matches the requested tool.
+function x402Challenge(toolName) {
+  const usd = TOOL_PRICES_USD[toolName] ?? 0.05;
+  return {
+    x402Version: 2,
+    error: "Payment required",
+    resource: {
+      url: "https://raen-mcp-gateway.fly.dev/mcp",
+      description: `RAEN MCP Gateway tool call (${toolName}) — $${usd.toFixed(2)} USDC on Base Mainnet. First call free via charge-and-rebate, or use a free dev key from /keys/request.`,
+      mimeType: "application/json",
+    },
+    accepts: [{
+      scheme: "exact",
+      network: "eip155:8453",
+      amount: String(Math.round(usd * 1e6)),
+      asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72f",
+      maxTimeoutSeconds: 300,
+      extra: { name: "USD Coin", version: "2" },
+    }],
+    extensions: {
+      bazaar: { info: { input: { type: "http", queryParams: {}, method: "POST" }, output: { type: "json", example: { ok: true, result: "RAEN MCP Gateway tool result" } } } },
+    },
+  };
+}
 
 function toolDefs() {
   return TOOLS.map((t) => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
@@ -117,19 +151,23 @@ app.get("/mcp", (req, res) => {
 
 // Stateless streamable-HTTP: direct JSON-RPC dispatch per POST (JSON responses, no session state).
 app.post("/mcp", async (req, res) => {
-  const expected = process.env.MCP_GATEWAY_KEY;
-  if (expected) {
-    const auth = req.headers.authorization || "";
-    if (!auth.startsWith("Bearer ") || !isValidGatewayKey(auth.slice(7))) {
-      return res.status(401).json({ error: "Unauthorized. Send Authorization: Bearer <MCP_GATEWAY_KEY>." });
-    }
-  }
   const body = req.body;
   const isNotification = body && body.jsonrpc === "2.0" && body.id === undefined;
   if (!body || body.jsonrpc !== "2.0" || (!isNotification && body.id === undefined)) {
     return res.status(400).json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid JSON-RPC 2.0 request" } });
   }
   if (isNotification) return res.status(202).end();
+  // Auth: discovery methods (initialize/ping/tools/list) are open so x402 marketplaces
+  // can verify the endpoint. tools/call requires either a valid Bearer key (dev keys /
+  // MCP_GATEWAY_KEY) or an x402 payment — unpaid calls get the canonical 402 challenge.
+  const auth = req.headers.authorization || "";
+  const hasValidKey = auth.startsWith("Bearer ") && isValidGatewayKey(auth.slice(7));
+  if (body.method === "tools/call" && !hasValidKey) {
+    const toolName = (body.params || {}).name || "unknown-tool";
+    const challenge = x402Challenge(toolName);
+    res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
+    return res.status(402).json(challenge);
+  }
   try {
     let result;
     switch (body.method) {
