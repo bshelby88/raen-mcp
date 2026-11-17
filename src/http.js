@@ -5,6 +5,7 @@
 import express from "express";
 import { TOOLS } from "./tools.js";
 import { registerKeyRoutes, isValidGatewayKey } from "./keys.js";
+import { settleToolPayment } from "./settle.js";
 
 const TOOL_NAMES = TOOLS.map((t) => t.name);
 const PROTOCOL_VERSION = "2025-03-26";
@@ -176,9 +177,28 @@ app.post("/mcp", async (req, res) => {
   const hasValidKey = auth.startsWith("Bearer ") && isValidGatewayKey(auth.slice(7));
   if (body.method === "tools/call" && !hasValidKey) {
     const toolName = (body.params || {}).name || "unknown-tool";
-    const challenge = x402Challenge(toolName);
-    res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
-    return res.status(402).json(challenge);
+    const payHeader = req.headers["payment-signature"] || req.headers["x-payment"] || null;
+    if (!payHeader) {
+      const challenge = x402Challenge(toolName);
+      challenge.paymentInstructions = [
+        `1. Sign an x402 v2 exact-scheme payment for ${challenge.accepts[0].amount} (${TOOL_PRICES_USD[toolName]?.toFixed(2) ?? "0.05"} USDC) to ${challenge.accepts[0].payTo} on ${challenge.accepts[0].network}.`,
+        `2. REPEAT this exact POST with the signed payload in the PAYMENT-SIGNATURE header (base64 JSON; legacy X-PAYMENT also accepted). The gateway verifies + settles via https://raen-facilitator.fly.dev/facilitator and returns the tool result with a payment-response header.`,
+        `3. Already settled? Just retry with your payload — settled authorizations are honored (single-use).`,
+      ].join(" ");
+      res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
+      return res.status(402).json(challenge);
+    }
+    // Buyer paid: verify + settle through the facilitator before releasing the result.
+    const usd = TOOL_PRICES_USD[toolName] ?? 0.05;
+    const settle = await settleToolPayment(payHeader, toolName, usd);
+    if (!settle.ok) {
+      const challenge = x402Challenge(toolName);
+      challenge.error = `Payment rejected (${settle.kind}): ${settle.detail}`;
+      res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
+      return res.status(402).json(challenge);
+    }
+    res.set("payment-response", Buffer.from(JSON.stringify(settle.receipt)).toString("base64"));
+    if (settle.tx) console.log(`[mcp] ${toolName} unlocked by settlement tx=${settle.tx}`);
   }
   try {
     let result;
