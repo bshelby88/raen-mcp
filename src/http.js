@@ -81,6 +81,12 @@ app.get("/.well-known/agent-registration.json", sendDoc("agent-registration.json
 // A2A Protocol AgentCard (A2A discovery spec) — distinct from the ERC-8004 registration above.
 app.get("/.well-known/agent.json", sendDoc("agent-card.json", "application/json"));
 
+// TIFF-AGENT-ESCALATE-01 (2026-11-17): machine-readable commercial terms +
+// human handoff. Free routes — never gated by the /mcp paywall.
+const ESCALATE = require("./escalate-contract.cjs");
+app.get("/terms.json", (_req, res) => res.json(ESCALATE.terms));
+app.get(["/human", "/human.json"], (_req, res) => res.json(ESCALATE.human));
+
 // Landing page (GET /): lightweight discoverability surface linking the Agent Kit and free tools.
 app.get("/", (_req, res) => {
   res.type("html").send(`<!DOCTYPE html>
