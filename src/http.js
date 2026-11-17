@@ -83,7 +83,11 @@ app.get("/.well-known/agent.json", sendDoc("agent-card.json", "application/json"
 
 // TIFF-AGENT-ESCALATE-01 (2026-11-17): machine-readable commercial terms +
 // human handoff. Free routes — never gated by the /mcp paywall.
-const ESCALATE = require("./escalate-contract.cjs");
+// ESM-safe CJS interop: this file is an ES module (package.json type:module);
+// bare `require` throws at import time and crash-loops the machine.
+import { createRequire } from "module";
+const nodeRequire = createRequire(import.meta.url);
+const ESCALATE = nodeRequire("./escalate-contract.cjs");
 app.get("/terms.json", (_req, res) => res.json(ESCALATE.terms));
 app.get(["/human", "/human.json"], (_req, res) => res.json(ESCALATE.human));
 
