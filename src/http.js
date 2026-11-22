@@ -76,6 +76,10 @@ const DOCS_DIR = dirname(fileURLToPath(import.meta.url));
 const sendDoc = (file, type) => (_req, res) => { try { res.type(type).send(readFileSync(join(DOCS_DIR, file))); } catch { res.status(404).end(); } };
 app.get("/llms.txt", sendDoc("llms.txt", "text/plain; charset=utf-8"));
 app.get("/openapi.json", sendDoc("openapi.json", "application/json"));
+// TIFFANY 2026-11-22: standard x402 manifest path was 404 — crawler-facing
+// manifest (resources shape, canonical payTo) + free pricing sheet.
+app.get("/.well-known/x402.json", sendDoc("x402.json", "application/json"));
+app.get("/pricing.md", sendDoc("pricing.md", "text/markdown; charset=utf-8"));
 app.get("/.well-known/x402", sendDoc("openapi.json", "application/json"));
 app.get("/.well-known/agent-registration.json", sendDoc("agent-registration.json", "application/json"));
 // A2A Protocol AgentCard (A2A discovery spec) — distinct from the ERC-8004 registration above.
