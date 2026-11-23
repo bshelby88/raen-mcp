@@ -7,6 +7,27 @@ Auth: `Authorization: Bearer <MCP_GATEWAY_KEY>` (gateway key required — tool c
 
 > **New to RAEN?** New wallets get their **first call free** (charge-and-rebate, net $0). Want a free gateway dev key? Clear the [**x402 Dev Quest**](https://raen-x402-quest.vercel.app) — decode a live 402, read the price, settle a real $0.01 payment on Base, redeem the claim code at [raen-bounties](https://github.com/bshelby88/raen-bounties).
 
+## Paid but got nothing? The claims desk
+
+A settled call that returned no payload is recoverable — **do not pay again**.
+
+```bash
+# look up your payment by tx hash OR by your wallet address
+curl -s "https://settlement-collector.fly.dev/storefront/claims?tx=<your-tx-hash>"
+curl -s "https://settlement-collector.fly.dev/storefront/claims?payer=<your-address>"
+# then register for (re)delivery — email, or callback_url for machine buyers:
+curl -s -X POST https://settlement-collector.fly.dev/storefront/register \
+  -H "Content-Type: application/json" \
+  -d '{"tx_or_intent":"<tx or address>","email":"you@example.com"}'
+```
+
+Your claim code is `RAEN-<sha256(tx)[:10]>` (uppercase, derivable from your own
+tx hash); verify a prepaid credit at `GET /storefront/credits/<code>`. This also
+covers payments to the retired payee `0x7861db4efc14a1ed5dd8c96c528a3796560f1393`
+— that wallet is still served and **watched**: every USDC transfer to it
+auto-creates an order + claim code (status: `/storefront/legacy-watch`).
+Full walkthrough: [cookbook recipe 22](https://github.com/bshelby88/x402-cookbook/blob/main/recipes/22-claims-desk.md). Human: ops@royalruby.io.
+
 ## Tools
 
 | Tool | Service | Price (USDC, Base) | Input |

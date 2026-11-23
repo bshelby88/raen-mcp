@@ -22,3 +22,11 @@ RAEN runs 12 x402-payable API services on Base, behind one MCP gateway. Every to
 ## Payments
 x402 / USDC on Base. First call free per wallet. Payer wallet: 0xfbc0eb7811d477e55261d956df39f0046e192240
 ERC-8004 agent identity: eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432 agentId 1178050 (https://raen-mcp-gateway.fly.dev/.well-known/agent-registration.json)
+
+## Claims desk (paid but got nothing — do not pay again)
+- Lookup your payment: GET https://settlement-collector.fly.dev/storefront/claims?tx=<tx hash> or ?payer=<your address>
+- Claim code: RAEN-<sha256(tx)[:10]> uppercase — derivable from your own tx; lookup confirms it and its state
+- Register for (re)delivery: POST https://settlement-collector.fly.dev/storefront/register {"tx_or_intent":"<tx or address>","email":"..."} or {"tx_or_intent":"...","agent_id":"...","callback_url":"https://..."} for machine webhook delivery
+- Prepaid credit verify/redeem: GET/POST https://settlement-collector.fly.dev/storefront/credits/<code> — services accept it as X-RAEN-CREDIT instead of a new payment
+- Retired-payee stranding watch: transfers to 0x7861db4efc14a1ed5dd8c96c528a3796560f1393 are also tracked (auto order + claim code) — status GET https://settlement-collector.fly.dev/storefront/legacy-watch
+- Human contact: ops@royalruby.io
