@@ -247,5 +247,15 @@ app.post("/mcp", async (req, res) => {
   }
 });
 
+// === A2A/MCP Catalog Discovery Routes (RAEN-2026-11-26) ===
+// x402scan SIWX registration requires a valid x-payment-info schema.
+// These routes expose the MCP catalog in a machine-readable form for external discovery.
+app.get("/tools/list", (_req, res) => {
+  res.json({ tools: toolDefs(), total_tools: toolDefs().length });
+});
+// SECURITY 2026-11-26: unauthenticated POST /tools/call removed (ran paid tool handlers with no payment/key check).
+// Tool calls go through POST /mcp (x402 / Bearer gated) only.
+// === End catalog routes ===
+
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`raen-mcp-gateway streamable-http listening on :${port}/mcp`));
