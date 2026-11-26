@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "service": {
+    "name": "raen-mcp-gateway",
+    "description": "RAEN paid x402 MCP gateway — one endpoint, many tools: law lookup, dispute letters, image generation, contract analysis. USDC on Base, x402 v2 exact scheme, EIP-3009 transferWithAuthorization. tools/list is free for discovery; tools/call settles $0.05 per call. First call free via charge-and-rebate, or request a free dev key at /keys/request."
+  },
+  "payTo": "0x9b8a27e03CEbA490953cDa8AB1291c0E13baf72F",
+  "accepts": {
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "amount": "50000",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "payTo": "0x9b8a27e03CEbA490953cDa8AB1291c0E13baf72F"
+  },
+  "resources": [
+    { "method": "POST", "path": "/mcp", "description": "MCP endpoint (JSON-RPC 2.0). tools/list is FREE discovery; tools/call is paid — $0.05 USDC per call, x402 challenge returned on first unpaid call.", "accepts": { "scheme": "exact", "network": "eip155:8453", "amount": "50000", "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "payTo": "0x9b8a27e03CEbA490953cDa8AB1291c0E13baf72F", "price": "$0.05" } },
+    { "method": "GET", "path": "/llms.txt", "description": "FREE: plain-text tool index for crawlers and LLM agents." },
+    { "method": "GET", "path": "/openapi.json", "description": "FREE: OpenAPI 3.0 spec of the gateway surface." },
+    { "method": "GET", "path": "/.well-known/agent-registration.json", "description": "FREE: ERC-8004 agent registration." },
+    { "method": "GET", "path": "/.well-known/agent.json", "description": "FREE: A2A protocol AgentCard." },
+    { "method": "GET", "path": "/pricing.md", "description": "FREE: human- and agent-readable price sheet." }
+  ]
+}

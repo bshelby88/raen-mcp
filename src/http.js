@@ -76,6 +76,10 @@ const DOCS_DIR = dirname(fileURLToPath(import.meta.url));
 const sendDoc = (file, type) => (_req, res) => { try { res.type(type).send(readFileSync(join(DOCS_DIR, file))); } catch { res.status(404).end(); } };
 app.get("/llms.txt", sendDoc("llms.txt", "text/plain; charset=utf-8"));
 app.get("/openapi.json", sendDoc("openapi.json", "application/json"));
+// TIFFANY 2026-11-22: standard x402 manifest path was 404 — crawler-facing
+// manifest (resources shape, canonical payTo) + free pricing sheet.
+app.get("/.well-known/x402.json", sendDoc("x402.json", "application/json"));
+app.get("/pricing.md", sendDoc("pricing.md", "text/markdown; charset=utf-8"));
 app.get("/.well-known/x402", sendDoc("openapi.json", "application/json"));
 app.get("/.well-known/agent-registration.json", sendDoc("agent-registration.json", "application/json"));
 // A2A Protocol AgentCard (A2A discovery spec) — distinct from the ERC-8004 registration above.
@@ -185,20 +189,60 @@ app.post("/mcp", async (req, res) => {
   // MCP_GATEWAY_KEY) or an x402 payment — unpaid calls get the canonical 402 challenge.
   const auth = req.headers.authorization || "";
   const hasValidKey = auth.startsWith("Bearer ") && isValidGatewayKey(auth.slice(7));
+  const payHeader = req.headers["payment-signature"] || req.headers["x-payment"] || null;
+  if (body.method === "tools/call" && !hasValidKey) {
+  const toolName = (body.params || {}).name || "unknown-tool";
+  if (!payHeader) {
+    const challenge = x402Challenge(toolName);
+    challenge.paymentInstructions = [
+      `1. Sign an x402 v2 exact-scheme payment for ${challenge.accepts[0].amount} (${TOOL_PRICES_USD[toolName]?.toFixed(2) ?? "0.05"} USDC) to ${challenge.accepts[0].payTo} on ${challenge.accepts[0].network}.`,
+      `2. REPEAT this exact POST with the signed payload in the PAYMENT-SIGNATURE header (base64 JSON; legacy X-PAYMENT also accepted). The gateway verifies + settles via https://raen-facilitator.fly.dev/facilitator and returns the tool result with a payment-response header.`,
+      `3. Already settled? Just retry with your payload — settled authorizations are honored (single-use).`,
+    ].join(" ");
+    res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
+    return res.status(402).json(challenge);
+  }
+  // F1 SETTLE-ORDER DOCTRINE (Franklin ruling afc8fa4b, 2026-11-17): the tool
+  // handler runs FIRST (deliverable is produced), settlement happens only on a
+  // successful result, and the result is released only after settlement. The old
+  // order (settle -> handler) charged payers for handler failures — the
+  // VALIDATION_ONLY incident shape. With the new order a handler failure never
+  // charges anyone, and the buyer's signed authorization was never settled, so it
+  // remains valid for a clean retry.
+  }
+  try {
+  let result;
+  switch (body.method) {
+    case "initialize":
+      result = {
+        protocolVersion: PROTOCOL_VERSION,
+        capabilities: { tools: {} },
+        serverInfo: {
+          name: "raen-mcp",
+          version: "1.0.0",
+          instructions: "RAEN paid x402 services. Each tool call spends USDC on Base via the x402 protocol; prices are listed per tool. New wallets get their first call free (charge-and-rebate, net $0). Earn a free gateway dev key by clearing https://raen-x402-quest.vercel.app (x402 Dev Quest).",
+        },
+      };
+      break;
+    case "ping":
+      result = {};
+      break;
+    case "tools/list":
+      result = { tools: toolDefs() };
+      break;
+    case "tools/call": {
+      const { name, arguments: args } = body.params || {};
+      const tool = TOOLS.find((t) => t.name === name);
+      if (!tool) throw Object.assign(new Error(`Unknown tool: ${name}`), { code: -32602 });
+      result = await tool.handler(args ?? {});
+      break;
+    }
+    default:
+      throw Object.assign(new Error(`Method not found: ${body.method}`), { code: -32601 });
+  }
+  // F1: settle AFTER the deliverable was produced, BEFORE releasing it.
   if (body.method === "tools/call" && !hasValidKey) {
     const toolName = (body.params || {}).name || "unknown-tool";
-    const payHeader = req.headers["payment-signature"] || req.headers["x-payment"] || null;
-    if (!payHeader) {
-      const challenge = x402Challenge(toolName);
-      challenge.paymentInstructions = [
-        `1. Sign an x402 v2 exact-scheme payment for ${challenge.accepts[0].amount} (${TOOL_PRICES_USD[toolName]?.toFixed(2) ?? "0.05"} USDC) to ${challenge.accepts[0].payTo} on ${challenge.accepts[0].network}.`,
-        `2. REPEAT this exact POST with the signed payload in the PAYMENT-SIGNATURE header (base64 JSON; legacy X-PAYMENT also accepted). The gateway verifies + settles via https://raen-facilitator.fly.dev/facilitator and returns the tool result with a payment-response header.`,
-        `3. Already settled? Just retry with your payload — settled authorizations are honored (single-use).`,
-      ].join(" ");
-      res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
-      return res.status(402).json(challenge);
-    }
-    // Buyer paid: verify + settle through the facilitator before releasing the result.
     const usd = TOOL_PRICES_USD[toolName] ?? 0.05;
     const settle = await settleToolPayment(payHeader, toolName, usd);
     if (!settle.ok) {
@@ -210,42 +254,14 @@ app.post("/mcp", async (req, res) => {
     res.set("payment-response", Buffer.from(JSON.stringify(settle.receipt)).toString("base64"));
     if (settle.tx) console.log(`[mcp] ${toolName} unlocked by settlement tx=${settle.tx}`);
   }
-  try {
-    let result;
-    switch (body.method) {
-      case "initialize":
-        result = {
-          protocolVersion: PROTOCOL_VERSION,
-          capabilities: { tools: {} },
-          serverInfo: {
-            name: "raen-mcp",
-            version: "1.0.0",
-            instructions: "RAEN paid x402 services. Each tool call spends USDC on Base via the x402 protocol; prices are listed per tool. New wallets get their first call free (charge-and-rebate, net $0). Earn a free gateway dev key by clearing https://raen-x402-quest.vercel.app (x402 Dev Quest).",
-          },
-        };
-        break;
-      case "ping":
-        result = {};
-        break;
-      case "tools/list":
-        result = { tools: toolDefs() };
-        break;
-      case "tools/call": {
-        const { name, arguments: args } = body.params || {};
-        const tool = TOOLS.find((t) => t.name === name);
-        if (!tool) throw Object.assign(new Error(`Unknown tool: ${name}`), { code: -32602 });
-        result = await tool.handler(args ?? {});
-        break;
-      }
-      default:
-        throw Object.assign(new Error(`Method not found: ${body.method}`), { code: -32601 });
-    }
-    res.json({ jsonrpc: "2.0", id: body.id, result });
+  res.json({ jsonrpc: "2.0", id: body.id, result });
   } catch (err) {
-    const code = err.code === -32601 || err.code === -32602 ? err.code : -32000;
-    res.json({ jsonrpc: "2.0", id: body.id, error: { code, message: err.message } });
+  // F1: this catch fires BEFORE any settlement has occurred on the paid path —
+  // the payer was never charged. Say so explicitly.
+  const code = err.code === -32601 || err.code === -32602 ? err.code : -32000;
+  res.json({ jsonrpc: "2.0", id: body.id, error: { code, message: `${err.message} (no payment was taken; paid calls settle only after a successful result)` } });
   }
-});
+  });
 
 // === A2A/MCP Catalog Discovery Routes (RAEN-2026-11-26) ===
 // x402scan SIWX registration requires a valid x-payment-info schema.
