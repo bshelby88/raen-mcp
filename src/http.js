@@ -29,7 +29,7 @@ function withPaymentInstructions(challenge) {
   const s =
     `1. Sign an x402 v2 exact-scheme payment for ${a.amount} (${usd} USDC) to ${a.payTo} on ${a.network}. ` +
     `2. REPEAT this exact request with the signed payload in the PAYMENT-SIGNATURE header (base64 JSON; legacy X-PAYMENT also accepted). The gateway verifies + settles via https://raen-facilitator.fly.dev/facilitator and returns the tool result with a payment-response header. ` +
-    `3. Already settled? Just retry with your payload — settled authorizations are honored (single-use).`;
+    `3. Already settled? Just retry with your payload — settled authorizations are honored (single-use). If a settle landed but the tool result never arrived, claim it at https://settlement-collector.fly.dev/storefront/claims with your tx hash.`;
   challenge.paymentInstructions = s;
   challenge.payment_instructions = s;
   return challenge;
@@ -111,6 +111,34 @@ const nodeRequire = createRequire(import.meta.url);
 const ESCALATE = nodeRequire("./escalate-contract.cjs");
 app.get("/terms.json", (_req, res) => res.json(ESCALATE.terms));
 app.get(["/human", "/human.json"], (_req, res) => res.json(ESCALATE.human));
+
+// [ROOT_HTML fix, fix wave 2026-11-26] manifest-lint: the root served HTML to
+// Accept: application/json — the front-door handshake failure for agents.
+// Machines get the JSON index at /; browsers keep the landing page below.
+app.use((req, res, next) => {
+  if (req.path !== "/" || (req.method !== "GET" && req.method !== "HEAD")) return next();
+  const accept = String(req.headers.accept || "");
+  if (!/application\/json/.test(accept)) return next();
+  res.set("Cache-Control", "public, max-age=60");
+  return res.json({
+    ok: true,
+    service: "raen-mcp-gateway",
+    handshake: "root-machine-index",
+    description: "Bearer-gated MCP server exposing RAEN's paid x402 services on Base Mainnet (USDC, pay per call). initialize/ping/tools/list are free; tools/call settles per tool via x402.",
+    manifest: "/.well-known/x402.json",
+    openapi: "/openapi.json",
+    llms_txt: "/llms.txt",
+    pricing: "/pricing.md",
+    health: "/health",
+    endpoints: [
+      { path: "/mcp", method: "POST", price: "$0.05 USDC per tools/call (raen_image_generate $0.01, raen_dispute_letter $0.10)", protocol: "x402 v2 exact, USDC on Base (eip155:8453)", payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72F", free_methods: ["initialize", "ping", "tools/list"] },
+      { path: "/mcp", method: "GET", price: "free", description: "Canonical x402 v2 discovery challenge (402)" },
+    ],
+    payment: { scheme: "exact", network: "eip155:8453", asset: "USDC (Base)", payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72F" },
+    recovery: "https://settlement-collector.fly.dev/storefront/claims",
+    docs: "https://raen-api-docs.vercel.app/",
+  });
+});
 
 // Landing page (GET /): lightweight discoverability surface linking the Agent Kit and free tools.
 app.get("/", (_req, res) => {
