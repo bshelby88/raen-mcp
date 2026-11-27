@@ -28,7 +28,7 @@ export const TOOLS = [
     name: "raen_law_lookup",
     title: "RAEN Law Lookup (FCRA/FDCPA/TILA/UDAP)",
     description:
-      "Look up US consumer-protection law citations (FCRA, FDCPA, TILA, state UDAP) on a topic. Returns formal citations, plain-English summaries, reporting timelines, and statutes of limitations. Information only, not legal advice. $0.05 USDC (x402, Base).",
+      "Look up US consumer-protection law citations (FCRA, FDCPA, TILA, state UDAP) on a topic. Returns formal citations, plain-English summaries, reporting timelines, and statutes of limitations. Information only, not legal advice. $0.005 USDC (x402, Base).",
     inputSchema: {
       type: "object",
       properties: {
@@ -38,14 +38,14 @@ export const TOOLS = [
     },
     async handler(args) {
       const r = await paidPost(`${BASE["royal-ruby"]}/api/law-lookup`, { topic: args.topic });
-      return wrap("royal-ruby law-lookup", "0.05", r);
+      return wrap("royal-ruby law-lookup", "0.005", r);
     },
   },
   {
     name: "raen_ticker_analysis",
     title: "RAEN Ticker Consensus Demo",
     description:
-      "Request a synthetic ticker market-consensus demo (TradingAgents payload). No live market data; not financial advice. $0.05 USDC (x402, Base).",
+      "Request a synthetic ticker market-consensus demo (TradingAgents payload). No live market data; not financial advice. $0.005 USDC (x402, Base).",
     inputSchema: {
       type: "object",
       properties: {
@@ -58,7 +58,7 @@ export const TOOLS = [
       const body = { ticker: args.ticker };
       if (args.date) body.date = args.date;
       const r = await paidPost(`${BASE["tradingagents"]}/api/analyze-ticker`, body);
-      return wrap("tradingagents analyze-ticker", "0.05", r);
+      return wrap("tradingagents analyze-ticker", "0.001", r);
     },
   },
   {
@@ -110,7 +110,7 @@ export const TOOLS = [
     name: "raen_contract_analysis",
     title: "RAEN Contract Analysis",
     description:
-      "Analyze contract text for risky, one-sided, or unusual clauses. Returns a risk score, flagged clauses with severity/explanation/suggested edits (Contract-Eye). $0.05 USDC (x402, Base).",
+      "Analyze contract text for risky, one-sided, or unusual clauses. Returns a risk score, flagged clauses with severity/explanation/suggested edits (Contract-Eye). $0.005 USDC (x402, Base).",
     inputSchema: {
       type: "object",
       properties: {
@@ -123,7 +123,7 @@ export const TOOLS = [
       const body = { text: args.text };
       if (args.focus) body.focus = args.focus;
       const r = await paidPost(`${BASE["contract-eye"]}/api/analyze-contract`, body);
-      return wrap("contract-eye analyze-contract", "0.05", r);
+      return wrap("contract-eye analyze-contract", "0.005", r);
     },
   },
 ];
