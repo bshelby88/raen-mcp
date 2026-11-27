@@ -19,5 +19,12 @@
     { "method": "GET", "path": "/.well-known/agent-registration.json", "description": "FREE: ERC-8004 agent registration." },
     { "method": "GET", "path": "/.well-known/agent.json", "description": "FREE: A2A protocol AgentCard." },
     { "method": "GET", "path": "/pricing.md", "description": "FREE: human- and agent-readable price sheet." }
+  ],
+  "endpoints": [
+    { "path": "/mcp", "method": "POST", "price": "$0.05 USDC per tools/call (raen_image_generate $0.01, raen_dispute_letter $0.10)", "protocol": "x402 v2 exact, USDC on Base (eip155:8453)", "payTo": "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72F", "description": "MCP streamable HTTP (JSON-RPC): initialize/ping/tools/list are free discovery; tools/call requires an x402 payment or a Bearer dev key", "tools": ["raen_law_lookup", "raen_ticker_analysis", "raen_dispute_letter", "raen_image_generate", "raen_contract_analysis"] },
+    { "path": "/mcp", "method": "GET", "price": "free", "description": "Canonical x402 v2 discovery challenge (402)." },
+    { "path": "/llms.txt", "method": "GET", "price": "free", "description": "Plain-text tool index for crawlers and LLM agents." },
+    { "path": "/openapi.json", "method": "GET", "price": "free", "description": "OpenAPI 3.1 spec of the gateway surface." },
+    { "path": "/pricing.md", "method": "GET", "price": "free", "description": "Human- and agent-readable price sheet." }
   ]
 }
