@@ -18,10 +18,27 @@ const TOOL_PRICES_USD = {
   raen_contract_analysis: 0.05,
 };
 
+// F1 fix wave 2026-11-26 (ShipGate402 day-one audit S1:402_BODY_THIN): the 402
+// body must carry payment_instructions (snake_case, the fleet checker regex
+// /payment_instructions/i) in BOTH the GET wall and every POST 402 — the
+// camelCase paymentInstructions alone never matched, so body-parsing agents
+// could not read the settle flow.
+function withPaymentInstructions(challenge) {
+  const a = challenge.accepts[0];
+  const usd = (Number(a.amount) / 1e6).toFixed(2);
+  const s =
+    `1. Sign an x402 v2 exact-scheme payment for ${a.amount} (${usd} USDC) to ${a.payTo} on ${a.network}. ` +
+    `2. REPEAT this exact request with the signed payload in the PAYMENT-SIGNATURE header (base64 JSON; legacy X-PAYMENT also accepted). The gateway verifies + settles via https://raen-facilitator.fly.dev/facilitator and returns the tool result with a payment-response header. ` +
+    `3. Already settled? Just retry with your payload — settled authorizations are honored (single-use).`;
+  challenge.paymentInstructions = s;
+  challenge.payment_instructions = s;
+  return challenge;
+}
+
 // Canonical x402 v2 challenge (mirrors GET /mcp wall). Amount matches the requested tool.
 function x402Challenge(toolName) {
   const usd = TOOL_PRICES_USD[toolName] ?? 0.05;
-  return {
+  return withPaymentInstructions({
     x402Version: 2,
     error: "Payment required",
     resource: {
@@ -41,7 +58,7 @@ function x402Challenge(toolName) {
     extensions: {
       bazaar: { info: { input: { type: "http", queryParams: {}, method: "POST" }, output: { type: "json", example: { ok: true, result: "RAEN MCP Gateway tool result" } } } },
     },
-  };
+  });
 }
 
 function toolDefs() {
@@ -172,6 +189,7 @@ app.get("/mcp", (req, res) => {
       bazaar: { info: { input: { type: "http", queryParams: {}, method: "POST" }, output: { type: "json", example: { ok: true, result: "RAEN MCP Gateway tool result" } } } },
     },
   };
+  withPaymentInstructions(challenge);
   res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
   res.status(402).json(challenge);
 });
@@ -179,26 +197,39 @@ app.get("/mcp", (req, res) => {
 // Stateless streamable-HTTP: direct JSON-RPC dispatch per POST (JSON responses, no session state).
 app.post("/mcp", async (req, res) => {
   const body = req.body;
+  // Auth state computed FIRST so the payment gate can answer BEFORE JSON-RPC
+  // schema validation (HIVE402 listing fix, 2026-11-26: the MCP validator
+  // graded the wall from an invalid POST and read "Expected 402, got 400").
+  // Unauthenticated invalid POSTs hit the 402 challenge; keyed clients keep
+  // strict MCP 400 semantics. Valid requests never enter this branch, so no
+  // real MCP client path changes.
+  const auth = req.headers.authorization || "";
+  const hasValidKey = auth.startsWith("Bearer ") && isValidGatewayKey(auth.slice(7));
+  const payHeader = req.headers["payment-signature"] || req.headers["x-payment"] || null;
   const isNotification = body && body.jsonrpc === "2.0" && body.id === undefined;
   if (!body || body.jsonrpc !== "2.0" || (!isNotification && body.id === undefined)) {
+    if (!hasValidKey) {
+      const challenge = x402Challenge("unpaid-request");
+      challenge.resource = {
+        url: "https://raen-mcp-gateway.fly.dev/mcp",
+        description: "RAEN MCP Gateway — this unauthenticated POST was answered by the payment gate before JSON-RPC validation. Valid requests: initialize, ping, tools/list (free), tools/call ($0.01–$0.10 USDC on Base per tool, first call free via charge-and-rebate).",
+        mimeType: "application/json",
+      };
+      res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
+      return res.status(402).json(challenge);
+    }
     return res.status(400).json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid JSON-RPC 2.0 request" } });
   }
   if (isNotification) return res.status(202).end();
   // Auth: discovery methods (initialize/ping/tools/list) are open so x402 marketplaces
   // can verify the endpoint. tools/call requires either a valid Bearer key (dev keys /
   // MCP_GATEWAY_KEY) or an x402 payment — unpaid calls get the canonical 402 challenge.
-  const auth = req.headers.authorization || "";
-  const hasValidKey = auth.startsWith("Bearer ") && isValidGatewayKey(auth.slice(7));
-  const payHeader = req.headers["payment-signature"] || req.headers["x-payment"] || null;
   if (body.method === "tools/call" && !hasValidKey) {
   const toolName = (body.params || {}).name || "unknown-tool";
   if (!payHeader) {
+    // x402Challenge() already carries paymentInstructions + payment_instructions
+    // (F1 fix wave 2026-11-26).
     const challenge = x402Challenge(toolName);
-    challenge.paymentInstructions = [
-      `1. Sign an x402 v2 exact-scheme payment for ${challenge.accepts[0].amount} (${TOOL_PRICES_USD[toolName]?.toFixed(2) ?? "0.05"} USDC) to ${challenge.accepts[0].payTo} on ${challenge.accepts[0].network}.`,
-      `2. REPEAT this exact POST with the signed payload in the PAYMENT-SIGNATURE header (base64 JSON; legacy X-PAYMENT also accepted). The gateway verifies + settles via https://raen-facilitator.fly.dev/facilitator and returns the tool result with a payment-response header.`,
-      `3. Already settled? Just retry with your payload — settled authorizations are honored (single-use).`,
-    ].join(" ");
     res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
     return res.status(402).json(challenge);
   }
@@ -272,6 +303,24 @@ app.get("/tools/list", (_req, res) => {
 // SECURITY 2026-11-26: unauthenticated POST /tools/call removed (ran paid tool handlers with no payment/key check).
 // Tool calls go through POST /mcp (x402 / Bearer gated) only.
 // === End catalog routes ===
+
+// HIVE402 companion: a body that fails JSON parsing never reaches the handler —
+// express's default 400 fires before the payment gate. Unauthenticated parse
+// failures on /mcp get the canonical 402 challenge instead; keyed clients and
+// any other error fall through to the default handler.
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  if (err && err.type === "entity.parse.failed") {
+    const auth = req.headers.authorization || "";
+    const keyed = auth.startsWith("Bearer ") && isValidGatewayKey(auth.slice(7));
+    if (!keyed) {
+      const challenge = x402Challenge("unpaid-request");
+      res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
+      return res.status(402).json(challenge);
+    }
+  }
+  next(err);
+});
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`raen-mcp-gateway streamable-http listening on :${port}/mcp`));
