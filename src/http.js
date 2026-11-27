@@ -25,7 +25,7 @@ const TOOL_PRICES_USD = {
 // could not read the settle flow.
 function withPaymentInstructions(challenge) {
   const a = challenge.accepts[0];
-  const usd = (Number(a.amount) / 1e6).toFixed(2);
+  const usd = (Number(a.amount) / 1e6).toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
   const s =
     `1. Sign an x402 v2 exact-scheme payment for ${a.amount} (${usd} USDC) to ${a.payTo} on ${a.network}. ` +
     `2. REPEAT this exact request with the signed payload in the PAYMENT-SIGNATURE header (base64 JSON; legacy X-PAYMENT also accepted). The gateway verifies + settles via https://raen-facilitator.fly.dev/facilitator and returns the tool result with a payment-response header. ` +
@@ -43,7 +43,7 @@ function x402Challenge(toolName) {
     error: "Payment required",
     resource: {
       url: "https://raen-mcp-gateway.fly.dev/mcp",
-      description: `RAEN MCP Gateway tool call (${toolName}) — $${usd.toFixed(2)} USDC on Base Mainnet. First call free via charge-and-rebate, or use a free dev key from /keys/request.`,
+      description: `RAEN MCP Gateway tool call (${toolName}) — $${usd.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")} USDC on Base Mainnet. First call free via charge-and-rebate, or use a free dev key from /keys/request.`,
       mimeType: "application/json",
     },
     accepts: [{
@@ -131,7 +131,7 @@ app.use((req, res, next) => {
     pricing: "/pricing.md",
     health: "/health",
     endpoints: [
-      { path: "/mcp", method: "POST", price: "$0.05 USDC per tools/call (raen_image_generate $0.01, raen_dispute_letter $0.10)", protocol: "x402 v2 exact, USDC on Base (eip155:8453)", payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72F", free_methods: ["initialize", "ping", "tools/list"] },
+      { path: "/mcp", method: "POST", price: "$0.001–$0.01 USDC per tools/call (law lookup / contract analysis $0.005, ticker $0.001, dispute letter / image $0.01)", protocol: "x402 v2 exact, USDC on Base (eip155:8453)", payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72F", free_methods: ["initialize", "ping", "tools/list"] },
       { path: "/mcp", method: "GET", price: "free", description: "Canonical x402 v2 discovery challenge (402)" },
     ],
     payment: { scheme: "exact", network: "eip155:8453", asset: "USDC (Base)", payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72F" },
@@ -147,7 +147,7 @@ app.get("/", (_req, res) => {
 <meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:system-ui;background:#0d1117;color:#e6edf3;max-width:640px;margin:3rem auto;padding:0 1rem">
 <h1>RAEN MCP Gateway</h1>
-<p>Bearer-gated MCP server exposing RAEN's paid x402 services on Base Mainnet (USDC, pay per call $0.01–$5.00).</p>
+<p>Bearer-gated MCP server exposing RAEN's paid x402 services on Base Mainnet (USDC, pay per call $0.001–$0.01).</p>
 <p><b>Connect:</b> POST JSON-RPC to <code>/mcp</code> with <code>Authorization: Bearer &lt;key&gt;</code>. Tools: raen_law_lookup, raen_ticker_analysis, raen_dispute_letter, raen_image_generate, raen_contract_analysis.</p>
 <ul>
 <li><a style="color:#58a6ff" href="https://github.com/bshelby88/raen-agent-kit">RAEN Agent Kit</a> — LangChain/LangGraph + CrewAI templates</li>
@@ -240,7 +240,7 @@ app.post("/mcp", async (req, res) => {
       const challenge = x402Challenge("unpaid-request");
       challenge.resource = {
         url: "https://raen-mcp-gateway.fly.dev/mcp",
-        description: "RAEN MCP Gateway — this unauthenticated POST was answered by the payment gate before JSON-RPC validation. Valid requests: initialize, ping, tools/list (free), tools/call ($0.01–$0.10 USDC on Base per tool, first call free via charge-and-rebate).",
+        description: "RAEN MCP Gateway — this unauthenticated POST was answered by the payment gate before JSON-RPC validation. Valid requests: initialize, ping, tools/list (free), tools/call ($0.001–$0.01 USDC on Base per tool, first call free via charge-and-rebate).",
         mimeType: "application/json",
       };
       res.set("payment-required", Buffer.from(JSON.stringify(challenge)).toString("base64"));
