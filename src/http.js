@@ -11,11 +11,11 @@ const TOOL_NAMES = TOOLS.map((t) => t.name);
 const PROTOCOL_VERSION = "2025-03-26";
 // Per-tool price in USD (mirrors src/tools.js wrap() prices). 1 USDC = 1e6 units.
 const TOOL_PRICES_USD = {
-  raen_law_lookup: 0.05,
-  raen_ticker_analysis: 0.05,
-  raen_dispute_letter: 0.10,
+  raen_law_lookup: 0.005,
+  raen_ticker_analysis: 0.001,
+  raen_dispute_letter: 0.01,
   raen_image_generate: 0.01,
-  raen_contract_analysis: 0.05,
+  raen_contract_analysis: 0.005,
 };
 
 // F1 fix wave 2026-11-26 (ShipGate402 day-one audit S1:402_BODY_THIN): the 402
@@ -37,7 +37,7 @@ function withPaymentInstructions(challenge) {
 
 // Canonical x402 v2 challenge (mirrors GET /mcp wall). Amount matches the requested tool.
 function x402Challenge(toolName) {
-  const usd = TOOL_PRICES_USD[toolName] ?? 0.05;
+  const usd = TOOL_PRICES_USD[toolName] ?? 0.005;
   return withPaymentInstructions({
     x402Version: 2,
     error: "Payment required",
@@ -179,7 +179,7 @@ app.get("/mcp", (req, res) => {
     accepts: [{
       scheme: "exact",
       network: "eip155:8453",
-      amount: "50000",
+      amount: "5000",
       asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
       payTo: "0x9b8a27e03CEbA490953cDa8AB1291c0E13bAf72f",
       maxTimeoutSeconds: 300,
@@ -274,7 +274,7 @@ app.post("/mcp", async (req, res) => {
   // F1: settle AFTER the deliverable was produced, BEFORE releasing it.
   if (body.method === "tools/call" && !hasValidKey) {
     const toolName = (body.params || {}).name || "unknown-tool";
-    const usd = TOOL_PRICES_USD[toolName] ?? 0.05;
+    const usd = TOOL_PRICES_USD[toolName] ?? 0.005;
     const settle = await settleToolPayment(payHeader, toolName, usd);
     if (!settle.ok) {
       const challenge = x402Challenge(toolName);

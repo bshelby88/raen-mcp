@@ -30,13 +30,13 @@
     {
       "id": "raen_law_lookup",
       "name": "Law Lookup",
-      "description": "Look up US consumer-protection law citations (FCRA, FDCPA, TILA, state UDAP) on a topic. Returns formal citations, plain-English summaries, reporting timelines, and statutes of limitations. Information only, not legal advice. Price: $0.05 USDC per call (x402, Base).",
+      "description": "Look up US consumer-protection law citations (FCRA, FDCPA, TILA, state UDAP) on a topic. Returns formal citations, plain-English summaries, reporting timelines, and statutes of limitations. Information only, not legal advice. Price: $0.005 USDC per call (x402, Base).",
       "tags": ["legal", "research", "fcra", "fdcpa", "tila"]
     },
     {
       "id": "raen_ticker_analysis",
       "name": "Ticker Analysis",
-      "description": "Request a synthetic ticker market-consensus demo (TradingAgents payload). No live market data; not financial advice. Price: $0.05 USDC per call (x402, Base).",
+      "description": "Request a synthetic ticker market-consensus demo (TradingAgents payload). No live market data; not financial advice. Price: $0.001 USDC per call (x402, Base).",
       "tags": ["finance", "analysis", "demo"]
     },
     {
@@ -54,7 +54,7 @@
     {
       "id": "raen_contract_analysis",
       "name": "Contract Analysis",
-      "description": "Analyze contract text for risky, one-sided, or unusual clauses. Returns a risk score, flagged clauses with severity/explanation/suggested edits (Contract-Eye). Price: $0.05 USDC per call (x402, Base).",
+      "description": "Analyze contract text for risky, one-sided, or unusual clauses. Returns a risk score, flagged clauses with severity/explanation/suggested edits (Contract-Eye). Price: $0.005 USDC per call (x402, Base).",
       "tags": ["legal", "contracts", "risk"]
     }
   ],
