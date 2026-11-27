@@ -114,11 +114,12 @@ app.get(["/human", "/human.json"], (_req, res) => res.json(ESCALATE.human));
 
 // [ROOT_HTML fix, fix wave 2026-11-26] manifest-lint: the root served HTML to
 // Accept: application/json — the front-door handshake failure for agents.
-// Machines get the JSON index at /; browsers keep the landing page below.
+// Machines (and any client not explicitly asking for HTML) get the JSON index
+// at /; browsers (Accept: text/html) keep the landing page below.
 app.use((req, res, next) => {
   if (req.path !== "/" || (req.method !== "GET" && req.method !== "HEAD")) return next();
   const accept = String(req.headers.accept || "");
-  if (!/application\/json/.test(accept)) return next();
+  if (/text\/html/i.test(accept)) return next();
   res.set("Cache-Control", "public, max-age=60");
   return res.json({
     ok: true,
